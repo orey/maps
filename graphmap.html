@@ -5,11 +5,13 @@
     <title>HTML Canvas</title>
   </head>
   <body>
-    <canvas id="newCanvas" width="1000" height="800" style="border:2px solid #000000;"></canvas>
+    <p>
+      <label for="cwidth">Width:</label><input type="number" id="cwidth" name="cwidth" required value="1000" />
+      <label for="cheight">Height:</label><input type="number" id="cheight" name="cheight" required value="800" /><br />
+      <input id="clickMe" type="button" value="Create Canvas" onclick="createCanvas();" />
+    </p>
+    <div id="canvas"></div>
     <script src="formes.js"></script>
-    <script>
-      main("newCanvas", 1000, 800);
-    </script>
   </body>
 </html>
 

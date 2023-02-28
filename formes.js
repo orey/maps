@@ -107,5 +107,13 @@ function main(can, x, y) {
     printStuff(canvas);
 }
 
+function createCanvas() {
+    document.getElementById("canvas").innerHTML = '<canvas id="newCanvas" width="1000" height="800" style="border:2px solid #000000;"></canvas>';
+    //alert("Hello!");
+    let width = document.getElementById("cwidth").value;
+    let height = document.getElementById("cheight").value;
+    main("newCanvas", width, height);
+}
+
 
 
