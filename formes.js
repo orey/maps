@@ -107,25 +107,16 @@ function main(can, x, y) {
     printStuff(canvas);
 }
 
-let TIMES = 0;
-
 function createCanvas() {
-    if (TIMES != 0) {
-        let oldcanv = document.getElementById('canvas');
-        document.removeChild(oldcanv);
-    }
-
-var canv = document.createElement('canvas');
-canv.id = 'canvas';
-document.body.appendChild(canv);
-
-
-        
-        document.getElementById("canvas").innerHTML = '<canvas id="newCanvas" width="1000" height="800" style="border:2px solid #000000;"></canvas>';
+    let wid = document.getElementById("cwidth").value;
+    let hei = document.getElementById("cheight").value;
+    document.getElementById("canvas").innerHTML = '<canvas id="newCanvas" width="'
+        + wid
+        + '" height="'
+        + hei
+        + '" style="border:2px solid #000000;"></canvas>';
     //alert("Hello!");
-    let width = document.getElementById("cwidth").value;
-    let height = document.getElementById("cheight").value;
-    main("newCanvas", width, height);
+    main("newCanvas", wid, hei);
 }
 
 
