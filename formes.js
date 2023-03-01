@@ -107,6 +107,41 @@ function main(can, x, y) {
     printStuff(canvas);
 }
 
+
+/*
+point object with 2 coordinates{x: 12, y:345}
+--
+H is the coordinates of the point target of two lines in the quadratic curve
+We calculate H coodinates in the referential of the AB segment, A being the origin
+We name Y the segment AY orthognal to AB in A
+ABY is an orthogonal referential with AB as the relative measure "1"
+
+horizontalOffset is the x coordinate of H in AB referential
+horizontalOffset is expressed in % of the AB length. If 0%, xH = 0, the same as A
+If 100%, xH = AB, so the same as B
+
+verticalOffset is the height orthogonal to the segment AB, the y coordinate of H
+verticalOffset is in percentage noted decimal 0.1 means 10% of AB, 2 means 200%, it can be negative
+
+All can be negative
+
+Référentiel original R (O, i, j)
+Référentiel nouveau R' (O', I, J)
+H(x,y) dans R et H(X,Y) dans R'
+I = ai + bj
+J = ci + dj
+avec ad-bc != 0
+x = aX + cY + x0
+y = bX + dY + y0
+*/
+function draw continuousLine(pointA, verticalOffset, horizontalOffset, pointB, pointC, Aorigin=true) {
+    // Calculer les coordonnées dans R du point Z, ZAB rectangle ZA = AB
+    
+    
+}
+
+
+
 function createCanvas() {
     let wid = document.getElementById("cwidth").value;
     let hei = document.getElementById("cheight").value;
