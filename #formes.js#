@@ -323,6 +323,13 @@ class MyVector extends Point {
     }
 }
 
+class PointsChain() {
+    
+
+}
+
+
+
 
 function testReferential(ctx, origin, I, J){
     let ref = new Referential(origin, I, J, true);
