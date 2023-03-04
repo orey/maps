@@ -10,6 +10,66 @@ let X = 0,
     Y = 0,
     CANVAS = "";
 
+/*
+Le référentiel original est celui du canvas
+Origin en haut à gauche, axe des x vers la doite et des y vers le bas
+---
+Référentiel original R (O, i, j)
+Référentiel nouveau R' (O', I, J)
+H(x,y) dans R et H(X,Y) dans R'
+I = ai + bj
+J = ci + dj
+avec ad-bc != 0
+x = aX + cY + x0
+y = bX + dY + y0
+*/
+class Referential {
+    // Un nouveau référentiel est défini par une origine et deux vecteurs définis dans l'ancien référentiel
+    constructor(ptOrigin, vectorI, vectorJ, originalReferential=, verbose=false){
+        this.origin = ptOrigin;
+        this.I = vectorI;
+        this.J = vectorJ;
+        this.verbose = verbose;
+        if (verbose){
+            console.log("Referential");
+            console.log(this.origin);
+            console.log(this.I);
+            console.log(this.J);
+        }
+        this.ref_origin = { x:0, y:0 };
+        this.ref_i      = { x:1, y:0 };
+        this.ref_j      = { x:0, y:1 };
+    }
+
+    // Option: le référentiel défini est composé des coordonnées de O', I et J dans un référentiel original O,i,j
+    // Mais nous allons avoir besoin de faire parfois une double transformation. Dans ce cas, le référentiel
+    // original n'est pas O, 1, 1 mais un autre
+    setOriginalReferential(ori, i, j) {
+        this.ref_origin = ori;
+        this.ref_i      = i;
+        this.ref_j      = i;
+    }
+    
+    // Cette fonction convertit les coordonnées dans le nouveau référentiel en coordonnées dans l'ancien
+    // typiquement dans les coordonnées traçables
+    convertCoordinates(ptNew) {
+        return {
+            x: (this.I.x * ptNew.x) + (this.J.x * ptNew.y) + this.origin.x ,
+            y: (this.I.y * ptNew.x) + (this.J.y * ptNew.y) + this.origin.y
+        };
+    }
+
+    // Identity in the case of the original referential
+    convertCoordinatesOriginal(ptNew) {
+        let pt = this.convertCoordinates(ptNew);
+        return {
+            x: (this.ref_i.x * pt.x) + (this.ref_j.x * pt.y) + this.ref_origin.x ,
+            y: (this.ref_i.y * pt.x) + (this.ref_j.y * pt.y) + this.ref_origin.y
+        }
+    }
+    
+}
+
 class Cell {
     constructor(x, y, h, v, verbose=false) {
         this.x = x;
@@ -32,19 +92,10 @@ class Cell {
         let step_h = Math.trunc(this.h/10);
         let step_v = Math.trunc(this.v/10);
         for (let i=0;i<11;i++) {
-            ctx.beginPath();
-            ctx.fillStyle = "red";
-            ctx.arc(this.x + (i*step_h), this.y, 2, 0, 2*Math.PI);
-            ctx.fill()
-            ctx.beginPath();
-            ctx.arc(this.x + (i*step_h), this.y + this.v, 2, 0, 2*Math.PI);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(this.x, this.y + (i*step_v), 2, 0, 2*Math.PI);
-            ctx.fill()
-            ctx.beginPath();
-            ctx.arc(this.x + this.h, this.y + (i*step_v), 2, 0, 2*Math.PI);
-            ctx.fill();
+            drawPoint(ctx,{ x: this.x + (i*step_h), y: this.y }             , "red", 2 );
+            drawPoint(ctx,{ x: this.x + (i*step_h), y: this.y + this.v }    , "red"    );
+            drawPoint(ctx,{ x: this.x             , y: this.y + (i*step_v) }, "red"    );
+            drawPoint(ctx,{ x: this.x + this.h    , y: this.y + (i*step_v) }, "red"    );
         }
         ctx.beginPath();
         ctx.moveTo(200, 100);
@@ -54,6 +105,14 @@ class Cell {
         
     }
 }
+
+function drawPoint(ctx, pt, color="blue", siz=2) {
+    ctx.beginPath();
+    ctx.fillStyle = color;
+    ctx.arc(pt.x, pt.y, siz, 0, 2*Math.PI);
+    ctx.fill();
+}
+
 
 
 function printStuff(canvas) {
@@ -107,6 +166,16 @@ function main(can, x, y) {
     printStuff(canvas);
 }
 
+function testReferential(ctx, origin, I, J){
+    let ref = new Referential(origin, I, J, true);
+    let pt1 = {x: 2, y:2};
+    console.log(pt1);
+    let pt2 = ref.convertCoordinates(pt1);
+    console.log(pt2);
+    drawPoint(ctx,pt2,"green");
+}
+
+
 
 /*
 point object with 2 coordinates{x: 12, y:345}
@@ -134,7 +203,7 @@ avec ad-bc != 0
 x = aX + cY + x0
 y = bX + dY + y0
 */
-function draw continuousLine(pointA, verticalOffset, horizontalOffset, pointB, pointC, Aorigin=true) {
+function drawContinuousLine(pointA, verticalOffset, horizontalOffset, pointB, pointC, Aorigin=true) {
     // Calculer les coordonnées dans R du point Z, ZAB rectangle ZA = AB
     
     
@@ -143,15 +212,30 @@ function draw continuousLine(pointA, verticalOffset, horizontalOffset, pointB, p
 
 
 function createCanvas() {
+    let can = "newCanvas";
     let wid = document.getElementById("cwidth").value;
     let hei = document.getElementById("cheight").value;
-    document.getElementById("canvas").innerHTML = '<canvas id="newCanvas" width="'
+    // remplissage élément dic avec un canvas
+    document.getElementById("canvas").innerHTML =
+        '<canvas id="'
+        + can
+        + '" width="'
         + wid
         + '" height="'
         + hei
         + '" style="border:2px solid #000000;"></canvas>';
     //alert("Hello!");
+    let canvas = document.getElementById(can);
+    var ctxt = canvas.getContext("2d");
+    // à modifier
     main("newCanvas", wid, hei);
+    // test ref
+    testReferential(
+        ctxt,
+        {x: 0, y:800},
+        {x:10, y:0},
+        {x: 0, y: -10}
+    );
 }
 
 
