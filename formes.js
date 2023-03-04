@@ -6,11 +6,77 @@
  *******************************************/
 "use strict";
 
-let X = 0,
-    Y = 0,
-    CANVAS = "";
+/*let X = 0,
+    Y = 0;*/
 
-/*
+/*--------------------------------------------------------------------------------
+class without encapsulation
+Permet d'encapsuler les x, y mais aussi le style du point,
+son référentiel et le ctx du canvas.
+--------------------------------------------------------------------------------*/
+class Point {
+    // can be accessed directly
+    size = 2;
+    label = "";
+    align = "center";
+    font= "12px serif";
+    offset = 10; //pixels
+    orient = "S"; // N, S, W, E
+
+    constructor(ctx, ref, x, y) {
+        this.ctx = ctx;
+        this.ref = ref;
+        this.x = x;
+        this.y = y;
+    }
+
+    //draw is always in the context of the referential
+    draw(color="blue") {
+        let temp = this.ref.convertCoordinatesOriginal({x: this.x, y: this.y});
+        this.ctx.beginPath();
+        this.ctx.fillStyle = color;
+        this.ctx.arc(Math.round(temp.x), Math.round(temp.y), this.size, 0, 2*Math.PI);
+        this.ctx.fill();
+        if (this.label != "") {
+            this.ctx.beginPath();
+            this.ctx.textAlign = this.align;
+            this.ctx.font = this.font;
+            //warning: offset is in absolute !!! TODO: integrate alignment
+            let xoffset = 0, yoffset = 0;
+            let southCorrection = Math.round(this.offset * 2 / 3);
+            let northCorrection = Math.round(this.offset * 1 / 3);
+            switch (this.orient) {
+            case 'N':
+                yoffset = -this.offset + northCorrection;
+                break;
+            case 'S':
+                yoffset = this.offset + southCorrection;
+                break;
+            case 'W':
+                xoffset = -this.offset;
+                break;
+            case 'E':
+                xoffset = this.offset;
+                break;
+            default:
+                break;
+            }
+            this.ctx.fillText(
+                this.label,
+                Math.round(temp.x) + xoffset,
+                Math.round(temp.y) + yoffset
+            );
+        }
+    }
+
+    setLabel(label, orient="S") {
+        this.label = label;
+        this.orient = orient;
+    }
+}
+
+
+/*--------------------------------------------------------------------------------
 Le référentiel original est celui du canvas
 Origin en haut à gauche, axe des x vers la doite et des y vers le bas
 ---
@@ -22,7 +88,7 @@ J = ci + dj
 avec ad-bc != 0
 x = aX + cY + x0
 y = bX + dY + y0
-*/
+--------------------------------------------------------------------------------*/
 class Referential {
     // Un nouveau référentiel est défini par une origine et deux vecteurs définis dans l'ancien référentiel
     constructor(ptOrigin, vectorI, vectorJ, verbose=false){
@@ -70,6 +136,27 @@ class Referential {
     
 }
 
+// fonction de base dans le référentiel absolu
+// cette focntion doit être réservée aux points bruts {x: , y:} car pour les
+// Point, il y a Point.draw()
+function drawPoint(ctx, pt, color="blue", siz=2) {
+    ctx.beginPath();
+    ctx.fillStyle = color;
+    ctx.arc(Math.round(pt.x), Math.round(pt.y), siz, 0, 2*Math.PI);
+    ctx.fill();
+}
+
+// Fonction dessinant dans le référentiel utilisateur
+// idem au dessus : Point.draw permet de prendre en compte les changements de référentiels
+function refDrawPoint(ctx, ref, pt, color="blue", siz=2) {
+    let temp = ref.convertCoordinatesOriginal(pt);
+    drawPoint(ctx, temp, color, siz);
+}
+
+
+/*--------------------------------------------------------------------------------
+Class cell, sans doute à reprendre un peu
+--------------------------------------------------------------------------------*/
 class Cell {
     constructor(x, y, h, v, verbose=false) {
         this.x = x;
@@ -107,93 +194,6 @@ class Cell {
     
 }
 
-//pos is a point
-function drawLabel(ctx, pos, text, color="blue", align="center",font= "12px serif") {
-    ctx.beginPath();
-    ctx.fillStyle = color;
-    ctx.textAlign = align;
-    ctx.font = font;
-    ctx.fillText(text, Math.round(pos.x), Math.round(pos.y));
-}
-
-
-//class without encapsulation
-class Point {
-    // can be accessed directly
-    size = 2;
-    label = "";
-    align = "center";
-    font= "12px serif";
-    offset = 10; //pixels
-    orient = "S"; // N, S, W, E
-
-    constructor(ctx, ref, x, y) {
-        this.ctx = ctx;
-        this.ref = ref;
-        this.x = x;
-        this.y = y;
-    }
-
-    //draw is always in the context of the referential
-    draw(color="blue") {
-        let temp = this.ref.convertCoordinatesOriginal({x: this.x, y: this.y});
-        this.ctx.beginPath();
-        this.ctx.fillStyle = color;
-        this.ctx.arc(Math.round(temp.x), Math.round(temp.y), this.size, 0, 2*Math.PI);
-        this.ctx.fill();
-        if (this.label != "") {
-            this.ctx.beginPath();
-            this.ctx.textAlign = this.align;
-            this.ctx.font = this.font;
-            //offset is in absolute !!!
-            let xoffset = 0, yoffset = 0;
-            let southCorrection = Math.round(this.offset * 2 / 3);
-            let northCorrection = Math.round(this.offset * 1 / 3);
-            switch (this.orient) {
-            case 'N':
-                yoffset = -this.offset + northCorrection;
-                break;
-            case 'S':
-                yoffset = this.offset + southCorrection;
-                break;
-            case 'W':
-                xoffset = -this.offset;
-                break;
-            case 'E':
-                xoffset = this.offset;
-                break;
-            default:
-                break;
-            }
-            this.ctx.fillText(
-                this.label,
-                Math.round(temp.x) + xoffset,
-                Math.round(temp.y) + yoffset
-            );
-        }
-    }
-
-    setLabel(label, orient="S") {
-        this.label = label;
-        this.orient = orient;
-    }
-}
-
-
-// fonction de base dans le référentiel absolu
-function drawPoint(ctx, pt, color="blue", siz=2) {
-    ctx.beginPath();
-    ctx.fillStyle = color;
-    ctx.arc(Math.round(pt.x), Math.round(pt.y), siz, 0, 2*Math.PI);
-    ctx.fill();
-}
-
-// Fonction dessinant dans le référentiel utilisateur
-function refDrawPoint(ctx, ref, pt, color="blue", siz=2) {
-    let temp = ref.convertCoordinatesOriginal(pt);
-    drawPoint(ctx, temp, color, siz);
-}
-
 // Fonction de base dans le référentiel absolu
 // les points sont des Point
 function drawSegment(pt1, pt2, color="blue") {
@@ -207,14 +207,12 @@ function drawSegment(pt1, pt2, color="blue") {
     ctx.stroke();
 }
 
-
-
 //absolute drawing
 function drawQuadratic(pt1, pt2, angle, color="blue") {
     let temp1 = pt1.ref.convertCoordinatesOriginal(pt1);
     let temp2 = pt2.ref.convertCoordinatesOriginal(pt2);
     let ang = angle.ref.convertCoordinatesOriginal(angle);
-    ang.draw();
+    drawPoint(pt1.ctx, ang, "green"); //trace
     let ctx = pt1.ctx;
     ctx.beginPath();
     ctx.strokeStyle = color;
@@ -242,19 +240,11 @@ function drawEasyQuadratic(pt1, pt2, hoffset, voffset, color="blue") {
     drawQuadratic(pt1, pt2, angle, color);
 }
 
-
+//==================================================== Fonctions de tests
 function printStuff(canvas) {
     var ctxt = canvas.getContext("2d");
-    /*
-      ctxt.fillRect(x, y, width, height)
-      // Draws a filled rectangle.
-
-      ctxt.strokeRect(x, y, width, height)
-      // Draws a rectangular outline.
-      
-      ctxt.clearRect(x, y, width, height)
-      // Clears the specified rectangular area, making it fully transparent.
-      */
+    var X = canvas.width;
+    var Y = canvas.height;
     ctxt.beginPath();
     // ctxt.strokeStyle = "#E0E0E0";
     ctxt.strokeStyle = "#E8E8E8";
@@ -281,18 +271,6 @@ function printStuff(canvas) {
     
 }
 
-
-function printSpace() {
-    console.log("%d", X, Y);
-}
-
-function main(can, x, y) {
-    X = x;
-    Y = y;
-    printSpace();
-    let canvas = document.getElementById(can);
-    printStuff(canvas);
-}
 
 class MyVector extends Point {
     constructor(ptA, ptB) {
@@ -579,11 +557,11 @@ function createCanvas() {
         + '" height="'
         + hei
         + '" style="border:2px solid #000000;"></canvas>';
-    //alert("Hello!");
+    // récupérer l'objet HTML canvas
     let canvas = document.getElementById(can);
     var ctxt = canvas.getContext("2d");
     // à modifier
-    main("newCanvas", wid, hei);
+    printStuff(canvas);
     // test ref
     testReferential(
         ctxt,
