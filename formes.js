@@ -120,7 +120,6 @@ function drawLabel(ctx, pos, text, color="blue", align="center",font= "12px seri
 //class without encapsulation
 class Point {
     // can be accessed directly
-    color = "blue";
     size = 2;
     label = "";
     align = "center";
@@ -136,15 +135,14 @@ class Point {
     }
 
     //draw is always in the context of the referential
-    draw() {
+    draw(color="blue") {
         let temp = this.ref.convertCoordinatesOriginal({x: this.x, y: this.y});
         this.ctx.beginPath();
-        this.ctx.fillStyle = this.color;
+        this.ctx.fillStyle = color;
         this.ctx.arc(Math.round(temp.x), Math.round(temp.y), this.size, 0, 2*Math.PI);
         this.ctx.fill();
         if (this.label != "") {
             this.ctx.beginPath();
-            this.ctx.fillStyle = this.color;
             this.ctx.textAlign = this.align;
             this.ctx.font = this.font;
             //offset is in absolute !!!
@@ -216,6 +214,7 @@ function drawQuadratic(pt1, pt2, angle, color="blue") {
     let temp1 = pt1.ref.convertCoordinatesOriginal(pt1);
     let temp2 = pt2.ref.convertCoordinatesOriginal(pt2);
     let ang = angle.ref.convertCoordinatesOriginal(angle);
+    ang.draw();
     let ctx = pt1.ctx;
     ctx.beginPath();
     ctx.strokeStyle = color;
@@ -232,7 +231,7 @@ function drawQuadratic(pt1, pt2, angle, color="blue") {
 // ofset is in % of pt1-pt2
 function drawEasyQuadratic(pt1, pt2, hoffset, voffset, color="blue") {
     // calculate distance between pt1 and pt2
-    let dist = Math.sqrt(Math.pow(pt1.x - pt2.x, 2) + Math.pow(pt1.y - pt2.y, 2));
+    let dist = distance(pt1,pt2);
     console.log(dist);
     let angle = new Point(pt1.ctx,
                           pt1.ref,
@@ -323,6 +322,138 @@ class MyVector extends Point {
     }
 }
 
+function getRandomNb(min, max) {
+    return (Math.random() * (max - min)) + min;
+}
+
+function distance(pt1, pt2) {
+    return Math.sqrt(Math.pow(pt1.x - pt2.x, 2) + Math.pow(pt1.y - pt2.y, 2));
+}
+
+class Droite {
+    constructor(p1, p2) {
+        this.p1 = p1;
+        this.p2 = p2;
+        this.ctx = p1.ctx;
+        this.ref = p1.ref
+        this.pente = (p2.y - p1.y) / (p2.x - p1.x);
+        this.cons = p1.y - (this.pente * p1.x);
+        drawSegment(p1, p2, "red");
+        this.direction = 'N';
+        if ((this.p1.x > this.p2.x) && (this.p1.y > this.p2.y))
+            this.direction = 'SW';
+        if ((this.p1.x > this.p2.x) && (this.p1.y < this.p2.y))
+            this.direction = 'NW';
+        if ((this.p1.x < this.p2.x) && (this.p1.y > this.p2.y))
+            this.direction = 'SE';
+        if ((this.p1.x < this.p2.x) && (this.p1.y < this.p2.y))
+            this.direction = 'NE';
+
+        if ((this.p1.x = this.p2.x) && (this.p1.y > this.p2.y))
+            this.direction = 'S';
+        if ((this.p1.x = this.p2.x) && (this.p1.y < this.p2.y))
+            this.direction = 'N';
+        if ((this.p1.x < this.p2.x) && (this.p1.y = this.p2.y))
+            this.direction = 'E';
+        if ((this.p1.x > this.p2.x) && (this.p1.y = this.p2.y))
+            this.direction = 'W';
+        console.log("direction: " + this.direction);
+    }
+
+    getPointAfterP2(dist) {
+        let deltax = Math.sqrt(Math.pow(dist, 2) / (1 + Math.pow(this.pente, 2)));
+        let deltay = deltax * this.pente;
+        let x = this.p2.x;
+        let y = this.p2.y;
+        switch(this.direction) {
+        case 'SW':
+            x -= deltax;
+            y -= deltay;
+            break;
+        case 'NW':
+            x -= deltax;
+            y += deltay;
+            break;
+        case 'SE':
+            x += deltax;
+            y -= deltay;
+            break;
+        case 'NE':
+            x += deltax;
+            y += deltay;
+            break;
+        case 'S':
+            y -= deltay;
+            break;
+        case 'N':
+            y += deltay;
+            break;
+        case 'E':
+            x += deltax;
+            break;
+        case 'W':
+            x -= deltax;
+            break;
+        }
+        return new Point(
+            this.ctx,
+            this.ref,
+            x,
+            y
+        );
+    }
+}
+
+class PointsChain {
+    constructor(p1, p2, offsetmin = 0.4, offsetmax = 0.6) {
+        this.A = p1;
+        this.B = p2;
+        this.P = null; // point de courbure initial
+        this.points = [];
+        this.angles = [];
+        this.ctx = p1.ctx;
+        this.ref = p1.ref
+        this.offmin = offsetmin;
+        this.offmax = offsetmax;
+    }
+    addPoint(pt) {
+        this.points[this.points.length] = pt;
+    }
+    getOffset() {
+        return getRandomNb(this.offmin, this.offmax);
+    }
+    
+    draw() {
+        let offsetx = this.getOffset();
+        let offsety = this.getOffset();
+        this.P = new Point(this.ctx,
+                           this.ref,
+                           this.A.x + offsetx,
+                           this.A.y + offsety);
+        drawQuadratic(this.A, this.B, this.P, "green");
+        // équation de la droite PB, droite tangente initiale
+        let origin = this.B;
+        let angleancien = this.P;
+        let d = null;
+        let angle = null;
+        let dist = 0;
+        let offset = 0;
+        for (let k of this.points) {
+            d = new Droite(angleancien, origin);
+            dist = distance(origin, k);
+            offset = this.getOffset();
+            angle = d.getPointAfterP2(offset * dist);
+            angle.draw("green");
+            drawQuadratic(origin, k, angle);
+            //prepare for next iteration
+            origin = k;
+            angleancien = angle;
+        }
+    }
+}
+
+
+
 
 function testReferential(ctx, origin, I, J){
     let ref = new Referential(origin, I, J, true);
@@ -365,6 +496,11 @@ function testReferential(ctx, origin, I, J){
         new Point(ctx, refAB, 0, 0),
         new Point(ctx, refAB, 1, 0),
         E);
+
+    let pc = new PointsChain(A, B);
+    pc.addPoint(C);
+    pc.draw();
+    
 
     // Nouveau référentiel
     let Ap = new Point (ctx, ref, 80, 30 );
