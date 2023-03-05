@@ -1,0 +1,6 @@
+* Langage
+
+| instruction | paramètres | exemple     |
+|-------------+------------+-------------|
+| point       | x y        | point 12 12 |
+|             |            |             |
