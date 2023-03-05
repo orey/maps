@@ -191,31 +191,6 @@ class Cell {
     
 }
 
-/*--------------------------------------------------------------------------------
-Class grid : travaille au niveau canvas, sans avoir besoin du référentiel
---------------------------------------------------------------------------------*/
-class Grid {
-    constructor(ctx, width, height, size, color="#E8E8E8") {
-        this.ctx = ctx,
-        this.width = width;
-        this.height = height;
-        this.size = size;
-        this.color = color;
-    }
-    draw() {
-        this.ctx.beginPath();
-        this.ctx.strokeStyle = this.color;
-        for (let i=0; i<=this.width; i=i+this.size) {
-            for (let j=0;j<=this.height;j=j+this.size) {
-                this.ctx.strokeRect(i, j, this.size, this.size);
-                //console.log("%d %d",i,j);
-            }
-        }
-    }
-
-}
-
-
 // Fonction de base dans le référentiel absolu
 // les points sont des Point
 function drawSegment(pt1, pt2, color="blue") {
@@ -438,4 +413,177 @@ class PointsChain {
         }
     }
 }
+
+//==================================================== Fonction de tests
+function printStuff(canvas) {
+    var ctxt = canvas.getContext("2d");
+    var X = canvas.width;
+    var Y = canvas.height;
+    ctxt.beginPath();
+    // ctxt.strokeStyle = "#E0E0E0";
+    ctxt.strokeStyle = "#E8E8E8";
+    //ctxt.strokeRect(500, 400, 100, 100);
+    let step = 20;
+    for (let i=0;i<=X;i=i+step) {
+        for (let j=0;j<=Y;j=j+step) {
+            ctxt.strokeRect(i, j, step, step);
+            //console.log("%d %d",i,j);
+        }
+    }
+    ctxt.fillStyle = "orange";
+    ctxt.beginPath();
+    ctxt.moveTo(75, 50);
+    ctxt.lineTo(100, 75);
+    ctxt.lineTo(100, 25);
+    ctxt.closePath();
+    ctxt.fill();
+
+    console.log("entre les deux");
+
+    let cell = new Cell(350,350,200,300, true);
+    cell.draw(ctxt);
+    
+}
+
+//==================================================== Fonction de tests
+function testReferential(ctx, origin, I, J){
+    let ref = new Referential(origin, I, J, true);
+    let pt1 = {x: 2, y:2};
+    /*console.log(pt1);
+    let pt2 = ref.convertCoordinates(pt1);
+    console.log(pt2);
+    drawPoint(ctx,pt2,"green");*/
+    refDrawPoint(ctx,ref, pt1,"green")
+    
+
+    // coordonnées dans mon référentiel ref
+    let A = new Point (ctx, ref, 10, 6 );
+    let B = new Point (ctx, ref, 20, 10 );
+    // construisons le référentiel basé sur A avec I = AB
+    let newI = new MyVector(A, B);
+    let newJ = newI.getOrthogonalVector();
+    let C = newJ.getTargetPoint(A);
+    A.setLabel('A');
+    A.draw();
+    B.setLabel('B','E');
+    B.draw();
+    C.setLabel('C', 'N');
+    C.draw();
+    drawSegment(A,B,"red");
+    drawSegment(A,C,"red");
+
+    // Points chain, fonctionne avec des points définis dans différents référentiels !
+    let pc = new PointsChain(A, B);
+    pc.addPoint(C);
+    pc.addPoint(new Point(ctx, ref, 44,18));
+    pc.addPoint(new Point(ctx, ref, 30,40));
+    pc.addPoint(new Point(ctx, ref, 35,45));
+    pc.addPoint(new Point(ctx, ref, 50,38));
+    pc.addPoint(new Point(ctx, ref, 55,45));
+    pc.addPoint(new Point(ctx, ref, 12,12));
+    pc.draw();
+    
+    // définition d'un nouveau référentiel
+    let refAB = new Referential(A, newI, newJ, true);
+    refAB.setOriginalReferential(ref);
+
+    // dans le référentiel AB
+    let D = new Point( ctx, refAB, 1.5, 1.5 );
+    D.setLabel('D','W');
+    D.draw();
+    let E = new Point(ctx, refAB, 0.7, 0.2 );
+    E.setLabel('E','E');
+    E.draw();
+    drawSegment(D,E);
+    drawQuadratic(
+        new Point(ctx, refAB, 0, 0),
+        new Point(ctx, refAB, 1, 0),
+        E);
+    
+    // Nouveau référentiel
+    let Ap = new Point (ctx, ref, 80, 30 );
+    let Bp = new Point (ctx, ref, 60, 16 );
+    let newIp = new MyVector(Ap, Bp);
+    let newJp = newIp.getOrthogonalVector();
+    let Cp = newJp.getTargetPoint(Ap);
+
+    let refApBp = new Referential(Ap, newIp, newJp, true);
+    refApBp.setOriginalReferential(ref);
+
+    Ap.setLabel('Ap', 'N');
+    Ap.draw();
+    Bp.setLabel('Bp','W');
+    Bp.draw();
+    Cp.setLabel('Cp', 'E');
+    Cp.draw();
+    drawSegment(Ap,Bp);
+    drawSegment(Ap,Cp);
+    drawEasyQuadratic(Bp, Ap, 0.2, 0.8);
+    let Start = new Point(ctx, refApBp, 1, 0);
+    let Target = new Point (ctx, refApBp, 0, 0);
+    drawEasyQuadratic(Start, Target, 0.2, 0.8, "red");
+    
+}
+
+
+/*--------------------------------------------------------------------------------
+Point d'entrée principal
+--------------------------------------------------------------------------------*/
+function createCanvas() {
+    let can = "newCanvas";
+    let wid = document.getElementById("cwidth").value;
+    let hei = document.getElementById("cheight").value;
+    // remplissage élément dic avec un canvas
+    document.getElementById("canvas").innerHTML =
+        '<canvas id="'
+        + can
+        + '" width="'
+        + wid
+        + '" height="'
+        + hei
+        + '" style="border:2px solid #000000;"></canvas>';
+    // récupérer l'objet HTML canvas
+    let canvas = document.getElementById(can);
+    var ctxt = canvas.getContext("2d");
+    // à modifier
+    printStuff(canvas);
+    // test ref
+    testReferential(
+        ctxt,
+        {x: 0, y:800},
+        {x:10, y:0},
+        {x: 0, y: -10}
+    );
+}
+
+/*--------------------------------------------------------------------------------
+Point d'entrée principal
+--------------------------------------------------------------------------------*/
+function createCanvas() {
+    let can = "newCanvas";
+    let wid = document.getElementById("cwidth").value;
+    let hei = document.getElementById("cheight").value;
+    // remplissage élément dic avec un canvas
+    document.getElementById("canvas").innerHTML =
+        '<canvas id="'
+        + can
+        + '" width="'
+        + wid
+        + '" height="'
+        + hei
+        + '" style="border:2px solid #000000;"></canvas>';
+    // récupérer l'objet HTML canvas
+    let canvas = document.getElementById(can);
+    var ctxt = canvas.getContext("2d");
+    // à modifier
+    printStuff(canvas);
+    // test ref
+    testReferential(
+        ctxt,
+        {x: 0, y:800},
+        {x:10, y:0},
+        {x: 0, y: -10}
+    );
+}
+
 

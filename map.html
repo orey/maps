@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>HTML Canvas</title>
+  </head>
+  <body>
+    <p>
+      <table>
+        <tr>
+          <td>
+            <table>
+              <tr>
+                <td><label for="cwidth">Width:</label></td>
+                <td><input type="number" id="cwidth" name="cwidth" required value="1000" /></td>
+              </tr>
+              <tr>
+                <td><label for="cheight">Height:</label></td>
+                <td><input type="number" id="cheight" name="cheight" required value="800" /></td> 
+              </tr>
+              <tr>
+                <td><label for="cgrid">Grid:</label></td>
+                <td><input type="number" id="cgrid" name="cgrid" required value="10" /></td>
+              </tr>
+              <tr>
+                <td><input id="clickMe" type="button" value="Create Canvas" onclick="createCanvas();" /></td><td></td>
+              </tr>
+            </table>
+            <p>
+              <label for="ccommands">Commands:</label><br />
+              <textarea name="ccommands" cols="40" rows="20"></textarea><br />
+              <input id="clickMe3" type="button" value="Parse and display" onclick="parse();" />
+            </p>
+            <p>
+              <input id="clickMe2" type="button" value="Generate image" onclick="exportImage();" />
+            </p>
+          </td>
+          <td>
+            <div id="canvas"></div>
+          </td>
+        </tr>
+      </table>
+    </p>
+    <script src="formes.js"></script>
+    <script src="map.js"></script>
+  </body>
+</html>
+
