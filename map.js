@@ -111,6 +111,26 @@ function parse() {
     
 }
 
+/*--------------------------------------------------------------------------------
+Sauvegarder les commandes
+--------------------------------------------------------------------------------*/
+function save() {
+    let d = new Date();
+    let s = String(d.getFullYear())
+        + String(d.getMonth()).padStart(2, '0')
+        + String(d.getDate()).padStart(2, '0') + '-'
+        + String(d.getHours()).padStart(2, '0')
+        + String(d.getMinutes()).padStart(2, '0')
+        + String(d.getSeconds()).padStart(2, '0');
+    document.getElementById("download").innerHTML =
+        '<a href="data:text/txt;base64,'
+        + btoa(document.getElementById('ccommands').value) + '"'
+        + 'download="' + s + '.map" />';
+    
+    a.click();
+    document.getElementById("download").innerHTML = "";
+}
+
 
 /*--------------------------------------------------------------------------------
 Export sous forme d'image
