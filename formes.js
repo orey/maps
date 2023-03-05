@@ -230,14 +230,15 @@ function drawSegment(pt1, pt2, color="blue") {
 }
 
 //absolute drawing
-function drawQuadratic(pt1, pt2, angle, color="blue") {
+function drawQuadratic(pt1, pt2, angle, color="blue", size=1) {
     let temp1 = pt1.ref.convertCoordinatesOriginal(pt1);
     let temp2 = pt2.ref.convertCoordinatesOriginal(pt2);
     let ang = angle.ref.convertCoordinatesOriginal(angle);
-    drawPoint(pt1.ctx, ang, "green"); //trace
+    //drawPoint(pt1.ctx, ang, "green"); //trace
     let ctx = pt1.ctx;
     ctx.beginPath();
     ctx.strokeStyle = color;
+    ctx.lineWidth = size;
     ctx.moveTo(Math.round(temp1.x), Math.round(temp1.y));
     ctx.quadraticCurveTo(
         Math.round(ang.x),
@@ -246,20 +247,6 @@ function drawQuadratic(pt1, pt2, angle, color="blue") {
         Math.round(temp2.y)
     );
     ctx.stroke();
-}
-
-// ofset is in % of pt1-pt2
-function drawEasyQuadratic(pt1, pt2, hoffset, voffset, color="blue") {
-    // calculate distance between pt1 and pt2
-    let dist = distance(pt1,pt2);
-    console.log(dist);
-    let angle = new Point(pt1.ctx,
-                          pt1.ref,
-                          pt1.x + (hoffset * dist),
-                          pt1.y + (voffset * dist)
-                         );
-    angle.draw();
-    drawQuadratic(pt1, pt2, angle, color);
 }
 
 
@@ -389,7 +376,7 @@ class Droite {
 Class PointsChain
 --------------------------------------------------------------------------------*/
 class PointsChain {
-    constructor(p1, p2, offsetmin = 0.4, offsetmax = 0.6) {
+    constructor(p1, p2, color= "blue", offsetmin = 0.4, offsetmax = 0.6) {
         this.A = p1;
         this.B = p2;
         this.P = null; // point de courbure initial
@@ -407,7 +394,7 @@ class PointsChain {
         return getRandomNb(this.offmin, this.offmax);
     }
     
-    draw() {
+    draw(color = "blue", size = 1) {
         // pour le premier point, les offsets sont positifs
         let offsetx = this.getOffset();
         let offsety = this.getOffset();
@@ -417,7 +404,7 @@ class PointsChain {
                            this.ref,
                            this.A.x + (offsetx * dis),
                            this.A.y + (offsety * dis));
-        drawQuadratic(this.A, this.B, this.P, "green");
+        drawQuadratic(this.A, this.B, this.P, color, size);
         // équation de la droite PB, droite tangente initiale
         let origin = this.B;
         let angleancien = this.P;
@@ -430,8 +417,8 @@ class PointsChain {
             dist = distance(origin, k);
             offset = this.getOffset();
             angle = d.getPointAfterP2(offset * dist);
-            angle.draw("green");
-            drawQuadratic(origin, k, angle);
+            //angle.draw("green"); // trace
+            drawQuadratic(origin, k, angle, color, size);
             //prepare for next iteration
             origin = k;
             angleancien = angle;
