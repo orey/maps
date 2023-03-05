@@ -30,7 +30,10 @@
               <label for="ccommands">Commands:</label><br />
               <textarea name="ccommands" id="ccommands" cols="40" rows="20"></textarea><br />
               <input id="clickMe3" type="button" value="Parse and display" onclick="parse()" />
-              <input id="clickme4" type="button" value="Save commands" onclick="save()" /><div id="download"></div>
+            </p>
+            <p>
+              <input id="clickme4" type="button" value="Save commands" onclick="save()" /><br />
+              <input type="file" value="Upload" accept=".map" onchange="uploadFile()">
             </p>
             <p>
               <input id="clickMe2" type="button" value="Generate image" onclick="exportImage();" />

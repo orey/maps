@@ -116,20 +116,39 @@ Sauvegarder les commandes
 --------------------------------------------------------------------------------*/
 function save() {
     let d = new Date();
-    let s = String(d.getFullYear())
+    let filename = String(d.getFullYear())
         + String(d.getMonth()).padStart(2, '0')
         + String(d.getDate()).padStart(2, '0') + '-'
         + String(d.getHours()).padStart(2, '0')
         + String(d.getMinutes()).padStart(2, '0')
-        + String(d.getSeconds()).padStart(2, '0');
-    document.getElementById("download").innerHTML =
-        '<a href="data:text/txt;base64,'
-        + btoa(document.getElementById('ccommands').value) + '"'
-        + 'download="' + s + '.map" />';
-    
-    a.click();
-    document.getElementById("download").innerHTML = "";
+        + String(d.getSeconds()).padStart(2, '0') + '.map';
+
+    let element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,'
+                         + encodeURIComponent(document.getElementById('ccommands').value));
+        element.setAttribute('download', filename);
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
 }
+
+function uploadFile() {
+    const content = document.querySelector('.content');
+    const [file] = document.querySelector('input[type=file]').files;
+    const reader = new FileReader();
+    
+    reader.addEventListener("load", () => {
+        // this will then display a text file on the console
+        console.log(reader.result);
+        document.getElementById('ccommands').value = reader.result;
+    }, false);
+    
+    if (file) {
+        reader.readAsText(file);
+    }
+}
+
 
 
 /*--------------------------------------------------------------------------------
