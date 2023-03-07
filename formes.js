@@ -229,14 +229,19 @@ function drawSegment(pt1, pt2, color="blue") {
     ctx.stroke();
 }
 
-//absolute drawing
-function drawQuadratic(pt1, pt2, angle, color="blue", size=1) {
+// absolute drawing
+// Tofill = false indique qu'on laisse à drawQuadratic la reponsabilité
+// de tirer des traits indépendants.
+// Avec = true, c'est l'appelant qui gère le path pour faire un close puis un fill
+function drawQuadratic(pt1, pt2, angle, color="blue", size=1, tofill=false) {
     let temp1 = pt1.ref.convertCoordinatesOriginal(pt1);
     let temp2 = pt2.ref.convertCoordinatesOriginal(pt2);
     let ang = angle.ref.convertCoordinatesOriginal(angle);
     //drawPoint(pt1.ctx, ang, "green"); //trace
     let ctx = pt1.ctx;
-    ctx.beginPath();
+    // si on est en mode tofill, le contrôle est fait de l'extérieur
+    if (! tofill)
+        ctx.beginPath();
     ctx.strokeStyle = color;
     ctx.lineWidth = size;
     ctx.moveTo(Math.round(temp1.x), Math.round(temp1.y));
@@ -394,7 +399,7 @@ class PointsChain {
         return getRandomNb(this.offmin, this.offmax);
     }
     
-    draw(color = "blue", size = 1) {
+    draw(color = "blue", size = 1, fill = false) {
         // pour le premier point, les offsets sont positifs
         let offsetx = this.getOffset();
         let offsety = this.getOffset();
@@ -404,7 +409,9 @@ class PointsChain {
                            this.ref,
                            this.A.x + (offsetx * dis),
                            this.A.y + (offsety * dis));
-        drawQuadratic(this.A, this.B, this.P, color, size);
+        if (fill)
+            this.ctx.beginPath();
+        drawQuadratic(this.A, this.B, this.P, color, size, fill);
         // équation de la droite PB, droite tangente initiale
         let origin = this.B;
         let angleancien = this.P;
@@ -418,10 +425,14 @@ class PointsChain {
             offset = this.getOffset();
             angle = d.getPointAfterP2(offset * dist);
             //angle.draw("green"); // trace
-            drawQuadratic(origin, k, angle, color, size);
+            drawQuadratic(origin, k, angle, color, size, fill);
             //prepare for next iteration
             origin = k;
             angleancien = angle;
+        }
+        if (fill) {
+            this.ctx.closePath();
+            this.ctx.fill();
         }
     }
 }

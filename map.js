@@ -79,6 +79,7 @@ function parse() {
             );
             let size2 = 1;
             let color2 = "blue";
+            let tofill = false;
             if (elems.length > 3){
                 let p = null;
                 for (let subcommand of elems.slice(3)) {
@@ -94,13 +95,16 @@ function parse() {
                     case 'size':
                         size2 = token[1];
                         break;
+                    case 'fill':
+                        tofill = true;
+                        break;
                     default:
                         console.warn("Command 'pointschain': argument not valid: " + token);
                         break;
                     }                        
                 }
             }
-            pc.draw(color2,size2);
+            pc.draw(color2,size2,tofill);
             break;
         default:
             console.warn("Command '" + elems[0] + "': unknown");

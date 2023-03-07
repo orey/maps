@@ -10,3 +10,4 @@
 | pointschain | coord:x:y        | coord:12:15 | Obligatoire (au moins 2 points |
 |             | color:thecolor   | color:green | Optionnel                      |
 |             | size: thesize    | size:4      | Optionnel                      |
+|             | fill             | fill        | Optionnel: boucle              |
