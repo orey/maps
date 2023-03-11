@@ -10,6 +10,61 @@ const CANVAS = "newCanvas";
 let REF = null;
 let CTX = null;
 
+/*
+PC = true => PointChain
+PC = false => ClosedArea
+*/
+function complexGrammar(elems, PC) {
+    if (elems.length < 3){
+        if (PC)
+            console.warn("Command 'pointschain': 2 parameters required at least (2 points)");
+        else
+            console.warn("Command 'closedarea': 2 parameters required at least (2 points)");
+    }
+    let temp1 = elems[1].split(':');
+    let temp2 = elems[2].split(':');
+    let pc = null;
+    if (PC)
+        pc = new PointsChain(
+            new Point(CTX, REF,parseInt(temp1[1]), parseInt(temp1[2])),
+            new Point(CTX, REF,parseInt(temp2[1]), parseInt(temp2[2])),
+        );
+    else
+        pc = new ClosedArea(
+            new Point(CTX, REF,parseInt(temp1[1]), parseInt(temp1[2])),
+            new Point(CTX, REF,parseInt(temp2[1]), parseInt(temp2[2])),
+        );
+    let size2 = 1;
+    let color2 = "blue";
+    let tofill = false;
+    if (elems.length > 3){
+        let p = null;
+        for (let subcommand of elems.slice(3)) {
+            let token = subcommand.split(':');
+            switch (token[0]) {
+            case 'coord':
+                p = new Point(CTX, REF, parseInt(token[1]), parseInt(token[2]));
+                pc.addPoint(p);
+                break;
+            case 'color':
+                color2 = token[1];
+                break;
+            case 'size':
+                size2 = token[1];
+                break;
+            default:
+                if (PC)
+                    console.warn("Command 'pointschain': argument not valid: " + token);
+                else
+                    console.warn("Command 'closedarea': argument not valid: " + token);
+                break;
+            }                        
+        }
+    }
+    pc.draw(color2,size2,tofill);   
+}
+
+
 /*--------------------------------------------------------------------------------
 Export sous forme d'image
 --------------------------------------------------------------------------------*/
@@ -67,44 +122,10 @@ function parse() {
             break;
             //======= pointschain
         case "pointschain":
-            if (elems.length < 3){
-                console.warn("Command 'pointschain': 2 parameters required at least (2 points)");
-                break;
-            }
-            let temp1 = elems[1].split(':');
-            let temp2 = elems[2].split(':');
-            let pc = new PointsChain(
-                new Point(CTX, REF,parseInt(temp1[1]), parseInt(temp1[2])),
-                new Point(CTX, REF,parseInt(temp2[1]), parseInt(temp2[2])),
-            );
-            let size2 = 1;
-            let color2 = "blue";
-            let tofill = false;
-            if (elems.length > 3){
-                let p = null;
-                for (let subcommand of elems.slice(3)) {
-                    let token = subcommand.split(':');
-                    switch (token[0]) {
-                    case 'coord':
-                        p = new Point(CTX, REF, parseInt(token[1]), parseInt(token[2]));
-                        pc.addPoint(p);
-                        break;
-                    case 'color':
-                        color2 = token[1];
-                        break;
-                    case 'size':
-                        size2 = token[1];
-                        break;
-                    case 'fill':
-                        tofill = true;
-                        break;
-                    default:
-                        console.warn("Command 'pointschain': argument not valid: " + token);
-                        break;
-                    }                        
-                }
-            }
-            pc.draw(color2,size2,tofill);
+            complexGrammar(elems, true);
+            break;
+        case "closedarea":
+            complexGrammar(elems,false);
             break;
         default:
             console.warn("Command '" + elems[0] + "': unknown");

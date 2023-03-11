@@ -239,7 +239,7 @@ function drawQuadratic(pt1, pt2, angle, color="blue", size=1, tofill=false) {
     let ang = angle.ref.convertCoordinatesOriginal(angle);
     //drawPoint(pt1.ctx, ang, "green"); //trace
     let ctx = pt1.ctx;
-    // si on est en mode tofill, le contrôle est fait de l'extérieur
+    // si on est en mode tofill, le contrôle du path est fait par l'appelant
     if (! tofill)
         ctx.beginPath();
     ctx.strokeStyle = color;
@@ -399,7 +399,7 @@ class PointsChain {
         return getRandomNb(this.offmin, this.offmax);
     }
     
-    draw(color = "blue", size = 1, fill = false) {
+    draw(color = "blue", size = 1) {
         // pour le premier point, les offsets sont positifs
         let offsetx = this.getOffset();
         let offsety = this.getOffset();
@@ -409,9 +409,8 @@ class PointsChain {
                            this.ref,
                            this.A.x + (offsetx * dis),
                            this.A.y + (offsety * dis));
-        if (fill)
-            this.ctx.beginPath();
-        drawQuadratic(this.A, this.B, this.P, color, size, fill);
+        this.ctx.beginPath();
+        drawQuadratic(this.A, this.B, this.P, color, size);
         // équation de la droite PB, droite tangente initiale
         let origin = this.B;
         let angleancien = this.P;
@@ -425,15 +424,68 @@ class PointsChain {
             offset = this.getOffset();
             angle = d.getPointAfterP2(offset * dist);
             //angle.draw("green"); // trace
-            drawQuadratic(origin, k, angle, color, size, fill);
+            drawQuadratic(origin, k, angle, color, size);
             //prepare for next iteration
             origin = k;
             angleancien = angle;
         }
-        if (fill) {
-            this.ctx.closePath();
-            this.ctx.fill();
-        }
     }
 }
 
+/*--------------------------------------------------------------------------------
+Class ClosedArea
+--------------------------------------------------------------------------------*/
+class ClosedArea {
+    constructor(p1, p2, color= "blue", offsetmin = 0.4, offsetmax = 0.6) {
+        this.A = p1;
+        this.B = p2;
+        this.P = null; // point de courbure initial
+        this.points = [];
+        this.angles = [];
+        this.ctx = p1.ctx;
+        this.ref = p1.ref
+        this.offmin = offsetmin;
+        this.offmax = offsetmax;
+        this.fill = true;
+    }
+    addPoint(pt) {
+        this.points[this.points.length] = pt;
+    }
+   getOffset() {
+        return getRandomNb(this.offmin, this.offmax);
+    }
+    
+    draw(color = "blue", size = 1) {
+        // pour le premier point, les offsets sont positifs
+        let offsetx = this.getOffset();
+        let offsety = this.getOffset();
+        console.log("offsetx: %f - offsety %f", offsetx, offsety);
+        let dis = distance(this.A, this.B);
+        this.P = new Point(this.ctx,
+                           this.ref,
+                           this.A.x + (offsetx * dis),
+                           this.A.y + (offsety * dis));
+        this.ctx.beginPath();
+        drawQuadratic(this.A, this.B, this.P, color, size, this.fill);
+        // équation de la droite PB, droite tangente initiale
+        let origin = this.B;
+        let angleancien = this.P;
+        let d = null;
+        let angle = null;
+        let dist = 0;
+        let offset = 0;
+        for (let k of this.points) {
+            d = new Droite(angleancien, origin);
+            dist = distance(origin, k);
+            offset = this.getOffset();
+            angle = d.getPointAfterP2(offset * dist);
+            //angle.draw("green"); // trace
+            drawQuadratic(origin, k, angle, color, size, this.fill);
+            //prepare for next iteration
+            origin = k;
+            angleancien = angle;
+        }
+        this.ctx.closePath();
+        this.ctx.fill();
+    }
+}
