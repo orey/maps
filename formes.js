@@ -130,6 +130,14 @@ class Referential {
             y: (this.ref_i.y * pt.x) + (this.ref_j.y * pt.y) + this.ref_origin.y
         }
     }
+
+    //convertit des coordonnées canvas en coordonnées référentiel
+    canvasToRef(x0, y0) {
+        return {
+            x: 0,
+            y: 0
+        }
+    }
     
 }
 
@@ -516,6 +524,7 @@ class ClosedArea {
         this.ctx.bezierCurveTo(ctrl_k.x,ctrl_k.y,ctrl_A.x,ctrl_A.y,this.A.x,this.A.y);
         this.ctx.stroke();*/
         this.ctx.closePath();
+        this.ctx.fillStyle = color;
         this.ctx.fill();
 
         this.ctx.beginPath();
