@@ -42,7 +42,7 @@ function complexGrammar(elems, PC) {
         for (let subcommand of elems.slice(3)) {
             let token = subcommand.split(':');
             switch (token[0]) {
-            case 'coord':
+            case 'pt':
                 p = new Point(CTX, REF, parseInt(token[1]), parseInt(token[2]));
                 pc.addPoint(p);
                 break;
@@ -88,7 +88,7 @@ function parse() {
                 // next stuff is coordinates
                 let token = subcommand.split(':');
                 switch (token[0]) {
-                case 'coord':
+                case 'pt':
                     p = new Point(CTX, REF, parseInt(token[1]), parseInt(token[2]));
                     break;
                 case 'color':
@@ -186,6 +186,14 @@ function exportImage() {
     document.body.appendChild(img);
 }
 
+function printMousePosition(canvas, event){
+    let div = document.getElementById("coord");
+    let rect = canvas.getBoundingClientRect();
+    let x = event.clientX - rect.left;
+    let y = event.clientY - rect.top;
+    // reprendre ici, convertir dans le nouveau référentiel
+    div.innerHTML = "x: " + Math.round(x) + " | y: " + Math.round(y);
+}
 
 /*--------------------------------------------------------------------------------
 Point d'entrée principal
@@ -222,6 +230,13 @@ function createCanvas() {
         console.log(mygrid);
         mygrid.draw();
     }
+    canvas.addEventListener(
+        "click",
+        function(e)
+        {
+            printMousePosition(canvas, e);
+        }
+    );
     
     
 }

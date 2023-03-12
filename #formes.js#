@@ -130,6 +130,13 @@ class Referential {
             y: (this.ref_i.y * pt.x) + (this.ref_j.y * pt.y) + this.ref_origin.y
         }
     }
+
+    //convertit des coordonnées canvas en coordonnées référentiel
+    canvasToRef(x0, y0) {
+        return {
+            x: 
+        }
+    }
     
 }
 

@@ -1,13 +1,21 @@
 * Langage
 
-| Instruction | Paramètres       | Exemple     | Note                           |
-|-------------+------------------+-------------+--------------------------------|
-| point       | coord:x:y        | coord:12:12 | Obligatoire                    |
-|             | color:thecolor   | color:blue  | Optionnel                      |
-|             | label:thelabel   | label:A     | Optionnel                      |
-|             | poslabel:N,S,E,W | poslabel:S  | Optionnel                      |
-|             | size:thesize     | size:4      | Optionnel                      |
-| pointschain | coord:x:y        | coord:12:15 | Obligatoire (au moins 2 points |
-|             | color:thecolor   | color:green | Optionnel                      |
-|             | size: thesize    | size:4      | Optionnel                      |
-|             | fill             | fill        | Optionnel: boucle              |
+** Instructions
+
+| Instruction | Paramètres       | Exemple     | Note                            |
+|-------------+------------------+-------------+---------------------------------|
+| point       | pt:x:y           | pt:12:12    | Obligatoire                     |
+|             | color:thecolor   | color:blue  | Optionnel                       |
+|             | label:thelabel   | label:A     | Optionnel                       |
+|             | poslabel:N,S,E,W | poslabel:S  | Optionnel                       |
+|             | size:thesize     | size:4      | Optionnel                       |
+| pointschain | pt:x:y           | pt:12:15    | Obligatoire (au moins 2 points) |
+|             | color:thecolor   | color:green | Optionnel                       |
+|             | size: thesize    | size:4      | Optionnel                       |
+| closedarea  | pt:x:y           | pt:12:15    | Obligatoire (au moins 2 points) |
+|             | color:thecolor   | color:green | Optionnel                       |
+|             | size: thesize    | size:4      | Optionnel                       |
+
+** Samples
+
+The samples are located in the /saved-maps/ folder.
