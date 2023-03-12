@@ -1,0 +1,4 @@
+point pt:25:25 color:red size:6 label:Torva
+pointschain pt:100:40 pt:90:50 pt:80:30 pt:70:40 pt:40:30 pt:30:50 size:3 pt:20:55 pt:10:50 pt:0:52 color:blue
+closedarea pt:40:60 pt:50:50 pt:48:30 pt:42:25 pt:35:45 color:green
+closedarea pt:78:51 pt:79:47 pt:79:52 color:blue
