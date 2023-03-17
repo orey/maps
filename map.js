@@ -8,6 +8,7 @@
 
 const CANVAS = "newCanvas";
 let REF = null;
+let MOUSE_REF = null;
 let CTX = null;
 
 /*
@@ -186,13 +187,20 @@ function exportImage() {
     document.body.appendChild(img);
 }
 
+/*--------------------------------------------------------------------------------
+Print mouse position
+--------------------------------------------------------------------------------*/
 function printMousePosition(canvas, event){
     let div = document.getElementById("coord");
     let rect = canvas.getBoundingClientRect();
     let x = event.clientX - rect.left;
     let y = event.clientY - rect.top;
-    // reprendre ici, convertir dans le nouveau référentiel
-    div.innerHTML = "x: " + Math.round(x) + " | y: " + Math.round(y);
+    console.log("x: %d, y: %d", x, y);
+    console.log(MOUSE_REF);
+    div.innerHTML = "x: "
+        + Math.round(MOUSE_REF.convertCoordinates({x, y}).x)
+        + " | y: "
+        + Math.round(MOUSE_REF.convertCoordinates({x, y}).y);
 }
 
 /*--------------------------------------------------------------------------------
@@ -230,6 +238,12 @@ function createCanvas() {
         console.log(mygrid);
         mygrid.draw();
     }
+    MOUSE_REF = new Referential(
+        {x:  0,                    y: h/refgrid },        // origin
+        {x: 1/refgrid, y: 0},        // I
+        {x: 0,                     y: -1/refgrid}, // J
+        true
+    );
     canvas.addEventListener(
         "click",
         function(e)

@@ -122,6 +122,10 @@ class Referential {
         };
     }
 
+    canvasCoordinatesToReferential(pt) {
+        
+    }
+
     // Identity in the case of the original referential
     convertCoordinatesOriginal(ptNew) {
         let pt = this.convertCoordinates(ptNew);
